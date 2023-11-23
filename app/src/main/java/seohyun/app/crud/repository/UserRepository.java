@@ -9,4 +9,5 @@ import seohyun.app.crud.models.User;
 public interface UserRepository extends JpaRepository<User, String> {
     
     Boolean existsByUserId(String userId);
+    User findOneByUserId(String userId);
 }
