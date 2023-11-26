@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
+import seohyun.app.crud.dto.UserDto;
 import seohyun.app.crud.models.User;
 import seohyun.app.crud.service.UserService;
 import seohyun.app.crud.utils.Bcrypt;
@@ -109,7 +110,73 @@ public class UserController {
         }
     }
     // 회원정보 수정(이미지)
+
     // 비밀번호 수정
+    @PostMapping("/updatepassword")
+    public ResponseEntity<Object> UpdatePassword(
+        @RequestHeader String authorization, @RequestBody Map<String, String> req
+    ) throws Exception{
+        try{
+            Map<String, String> map = new HashMap<>();
+            String decoded = jwt.VerifyToken(authorization);
+            User findUserId = userService.FindUserId(decoded);
+            Boolean comparePassword = bcrypt.CompareHash(req.get("password"), findUserId.getPassword());
+            if (comparePassword == false){
+                map.put("reesult", "failed 비밀번호가 일치하지 않습니다.");
+                return new ResponseEntity<>(map, HttpStatus.OK);
+            }
+            String hashPassword = bcrypt.HashPassword(req.get("newPassword"));
+            findUserId.setPassword(hashPassword);
+            userService.UpdatePassword(findUserId);
+            map.put("result", "success 수정이 완료되었습니다.");
+            return new ResponseEntity<>(map, HttpStatus.OK);
+        } catch(Exception e){
+            Map<String, String> map = new HashMap<>();
+            map.put("error", e.toString());
+            return new ResponseEntity<>(map, HttpStatus.OK);
+        }
+    }
+
+    // 비밀번호 수정(Dto사용 ver.)
+    @PostMapping("/updatepw")
+    public ResponseEntity<Object> UpdatePw(
+        @RequestHeader String authorization, @RequestBody UserDto req
+    ) throws Exception{
+        try{
+            Map<String, String> map = new HashMap<>();
+            String decoded = jwt.VerifyToken(authorization);
+            User findUserId = userService.FindUserId(decoded);
+            Boolean comparePassword = bcrypt.CompareHash(req.getPassword(), findUserId.getPassword());
+            if (comparePassword == false) {
+                map.put("reesult", "failed 비밀번호가 일치하지 않습니다.");
+                return new ResponseEntity<>(map, HttpStatus.OK);
+            }
+            String hashPassword = bcrypt.HashPassword(req.getNewPassword());
+            findUserId.setPassword(hashPassword);
+            userService.UpdatePassword(findUserId);
+            map.put("result", "success 수정이 완료되었습니다.");
+            return new ResponseEntity<>(map, HttpStatus.OK);
+        } catch(Exception e){
+            Map<String, String> map = new HashMap<>();
+            map.put("error", e.toString());
+            return new ResponseEntity<>(map, HttpStatus.OK);
+        }
+    }
     // 회원탈퇴
+    // 비밀번호 확인 후 맞으면 탈퇴.
+    @PostMapping("/unregister")
+    public ResponseEntity<Object> UnRegister(
+        @RequestHeader String authorization, @RequestBody User req
+    ) throws Exception{
+        try{
+            Map<String, String> map = new HashMap<>();
+            map.put("result", "");
+            return new ResponseEntity<>(map, HttpStatus.OK);
+        } catch(Exception e){
+            Map<String, String> map = new HashMap<>();
+            map.put("error", e.toString());
+            return new ResponseEntity<>(map, HttpStatus.OK);
+        }
+    }
     // 회원정보 조회(마이페이지)
 }

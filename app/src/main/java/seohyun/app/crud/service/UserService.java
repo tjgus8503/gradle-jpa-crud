@@ -2,6 +2,7 @@ package seohyun.app.crud.service;
 
 import java.util.UUID;
 
+import org.hibernate.mapping.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -62,6 +63,25 @@ public class UserService {
             req.setPassword(findUserId.getPassword());
             req.setImageUrl(findUserId.getImageUrl());
             userRepository.save(req);
+        } catch(Exception e){
+            throw new Exception(e);
+        }
+    }
+
+    @Transactional
+    public void UpdatePassword(User req) throws Exception{
+        try{
+            userRepository.save(req);
+        } catch(Exception e){
+            throw new Exception(e);
+        }
+    }
+
+    // deleteBy_ 부분부터.
+    @Transactional
+    public void UnRegister() throws Exception{
+        try{
+            userRepository.deleteById(null);
         } catch(Exception e){
             throw new Exception(e);
         }
