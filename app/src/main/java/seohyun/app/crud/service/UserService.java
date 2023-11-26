@@ -2,7 +2,6 @@ package seohyun.app.crud.service;
 
 import java.util.UUID;
 
-import org.hibernate.mapping.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
