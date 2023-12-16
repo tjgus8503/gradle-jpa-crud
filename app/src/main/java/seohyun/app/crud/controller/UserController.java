@@ -21,6 +21,7 @@ import seohyun.app.crud.dto.UserDto;
 import seohyun.app.crud.models.User;
 import seohyun.app.crud.service.UserService;
 import seohyun.app.crud.utils.Bcrypt;
+import seohyun.app.crud.utils.ImageFile;
 import seohyun.app.crud.utils.Jwt;
 
 @RestController
@@ -31,6 +32,7 @@ public class UserController {
     private final UserService userService;
     private final Bcrypt bcrypt;
     private final Jwt jwt;
+    private final ImageFile imageFile;
     
     @GetMapping("/hello")
     public ResponseEntity<Object> Hello() throws Exception{
@@ -92,7 +94,7 @@ public class UserController {
         }
     }
 
-    // 회원정보 수정(이름, 이메일)
+    // 회원정보 수정(이름, 이메일만 수정 가능)
     @PostMapping("/updateuser")
     public ResponseEntity<Object> UpdateUser(
         @RequestHeader String authorization, @RequestBody User req
@@ -109,7 +111,31 @@ public class UserController {
             return new ResponseEntity<>(map, HttpStatus.OK);
         }
     }
-    // 회원정보 수정(이미지)
+    // 이미지 등록
+
+    // 이미지 삭제
+    @PostMapping("/deleteimage")
+    public ResponseEntity<Object> DeleteImage(
+        @RequestHeader String authorization, @ModelAttribute User req, @RequestPart(required = false) MultipartFile image) throws Exception{
+        try{
+            Map<String, String> map = new HashMap<>();
+            String decoded = jwt.VerifyToken(authorization);
+            User findUserId = userService.FindUserId(decoded);
+            if (findUserId.getImageUrl() == null) {
+                map.put("result", "failed 삭제 할 이미지가 존재하지 않습니다.");
+                return new ResponseEntity<>(map, HttpStatus.OK);
+            }
+            // 이미지 있다면 삭제
+            userService.DeleteImage(findUserId);
+            map.put("result", "success 삭제가 완료되었습니다.");
+            return new ResponseEntity<>(map, HttpStatus.OK);
+        } catch(Exception e){
+            Map<String, String> map = new HashMap<>();
+            map.put("error", e.toString());
+            return new ResponseEntity<>(map, HttpStatus.OK);
+        }
+    }
+
 
     // 비밀번호 수정
     @PostMapping("/updatepassword")
@@ -163,14 +189,31 @@ public class UserController {
         }
     }
     // 회원탈퇴
-    // 비밀번호 확인 후 맞으면 탈퇴.
+    // 회원탈퇴 시 서버에서 이미지 삭제
     @PostMapping("/unregister")
     public ResponseEntity<Object> UnRegister(
         @RequestHeader String authorization, @RequestBody User req
     ) throws Exception{
         try{
             Map<String, String> map = new HashMap<>();
-            map.put("result", "");
+            String decoded = jwt.VerifyToken(authorization);
+            User findUserId = userService.FindUserId(decoded);
+            Boolean comparePassword = bcrypt.CompareHash(req.getPassword(), findUserId.getPassword());
+            if (comparePassword == false) {
+                map.put("reesult", "failed 비밀번호가 일치하지 않습니다.");
+                return new ResponseEntity<>(map, HttpStatus.OK);
+            }
+            userService.UnRegister(findUserId);
+            map.put("result", "success 탈퇴가 완료되었습니다.");
+            new Thread() {
+                public void run(){
+                    try {
+                        imageFile.DeleteImage(findUserId.getImageUrl());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }.start();
             return new ResponseEntity<>(map, HttpStatus.OK);
         } catch(Exception e){
             Map<String, String> map = new HashMap<>();

@@ -1,5 +1,8 @@
 package seohyun.app.crud.service;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -35,10 +38,10 @@ public class UserService {
             req.setId(uuid.toString());
             String hashPassword = bcrypt.HashPassword(req.getPassword());
             req.setPassword(hashPassword);
-            if (image != null) {
+            if (image != null){
                 String imageUrl = imageFile.CreateImage(image);
                 req.setImageUrl(imageUrl);
-            } req.setImageUrl(null);
+            } else {req.setImageUrl(null);}
             userRepository.save(req);
         } catch(Exception e){
             throw new Exception(e);
@@ -68,6 +71,18 @@ public class UserService {
     }
 
     @Transactional
+    public void DeleteImage(User req) throws Exception{
+        try{
+            Path filePath = Paths.get(req.getImageUrl());
+            Files.delete(filePath);
+            req.setImageUrl(null);
+            userRepository.save(req);
+        } catch(Exception e){
+            throw new Exception(e);
+        }
+    }
+
+    @Transactional
     public void UpdatePassword(User req) throws Exception{
         try{
             userRepository.save(req);
@@ -76,11 +91,10 @@ public class UserService {
         }
     }
 
-    // deleteBy_ 부분부터.
     @Transactional
-    public void UnRegister() throws Exception{
+    public void UnRegister(User req) throws Exception{
         try{
-            userRepository.deleteById(null);
+            userRepository.deleteById(req.getId());
         } catch(Exception e){
             throw new Exception(e);
         }

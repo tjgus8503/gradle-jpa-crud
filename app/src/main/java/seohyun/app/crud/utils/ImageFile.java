@@ -1,6 +1,9 @@
 package seohyun.app.crud.utils;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -19,5 +22,16 @@ public class ImageFile {
         File file = new File(uploadPath + savedFileName);
         image.transferTo(file);
         return uploadPath + savedFileName;
+    }
+
+    public void DeleteImage(String priorImage) throws Exception{
+        try{
+            if (priorImage != null) {
+                Path filePath = Paths.get(priorImage);
+                Files.delete(filePath);
+            }
+        } catch(Exception e){
+            throw new Exception(e);
+        }
     }
 }
