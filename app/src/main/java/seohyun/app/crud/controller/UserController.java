@@ -112,6 +112,26 @@ public class UserController {
         }
     }
     // 이미지 등록
+    @PostMapping("/createimage")
+    public ResponseEntity<Object> CreateImage(@RequestHeader String authorization,
+        @ModelAttribute User req, @RequestPart MultipartFile image) throws Exception{
+        try{
+            Map<String, String> map = new HashMap<>();
+            String decoded = jwt.VerifyToken(authorization);
+            User findUserId = userService.FindUserId(decoded);
+            if (findUserId.getImageUrl() != null) {
+                map.put("result", "failed 이미 이미지가 등록되어 있습니다.");
+                return new ResponseEntity<>(map, HttpStatus.OK);
+            }
+            userService.CreateImage(findUserId, image);
+            map.put("result", "success 등록이 완료되었습니다.");
+            return new ResponseEntity<>(map, HttpStatus.OK);
+        } catch(Exception e){
+            Map<String, String> map = new HashMap<>();
+            map.put("error", e.toString());
+            return new ResponseEntity<>(map, HttpStatus.OK);
+        }
+    }
 
     // 이미지 삭제
     @PostMapping("/deleteimage")
@@ -125,7 +145,6 @@ public class UserController {
                 map.put("result", "failed 삭제 할 이미지가 존재하지 않습니다.");
                 return new ResponseEntity<>(map, HttpStatus.OK);
             }
-            // 이미지 있다면 삭제
             userService.DeleteImage(findUserId);
             map.put("result", "success 삭제가 완료되었습니다.");
             return new ResponseEntity<>(map, HttpStatus.OK);
@@ -222,4 +241,21 @@ public class UserController {
         }
     }
     // 회원정보 조회(마이페이지)
+    @GetMapping("/mypage")
+    public ResponseEntity<Object> MyPage(@RequestHeader String authorization) throws Exception{
+        try{
+            String decoded = jwt.VerifyToken(authorization);
+            User findUserId = userService.FindUserId(decoded);
+            return new ResponseEntity<>(findUserId, HttpStatus.OK);
+        } catch(Exception e){
+            Map<String, String> map = new HashMap<>();
+            map.put("error", e.toString());
+            return new ResponseEntity<>(map, HttpStatus.OK);
+        }
+    }
+
+    // todo @RequestBody 부분 다시
+    // todo save all
+    // todo jpa pagination
+    // todo dockerfile
 }

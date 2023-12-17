@@ -71,6 +71,17 @@ public class UserService {
     }
 
     @Transactional
+    public void CreateImage(User req, MultipartFile image) throws Exception{
+        try {
+            String imageUrl = imageFile.CreateImage(image);
+            req.setImageUrl(imageUrl);
+            userRepository.save(req);
+        } catch (Exception e) {
+            throw new Exception(e);
+        }
+    }
+
+    @Transactional
     public void DeleteImage(User req) throws Exception{
         try{
             Path filePath = Paths.get(req.getImageUrl());
