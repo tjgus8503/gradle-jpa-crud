@@ -50,9 +50,6 @@ public class ProductController {
     // todo 상품 수정, 삭제
 
     // 상품 주문
-    // 동일하지 않은 상품 동시 주문 가능(예. 초코 100g *1개, 500g*1개 주문)
-    // todo 주문 할 상품들 중 재고가 부족한게 있다면 주문 실패
-    // todo 선 재고 업데이트 후 주문완료 안내
     @PostMapping("/purchaseproduct")
     public ResponseEntity<Object> PurchaseProduct(@RequestHeader String authorization,
     @RequestBody List<Purchase> req) throws Exception{
@@ -66,6 +63,25 @@ public class ProductController {
             }
             productService.PurchaseProduct(req, decoded);
             map.put("result", "success 주문이 완료되었습니다.");
+            return new ResponseEntity<>(map, HttpStatus.OK);
+        } catch(Exception e){
+            Map<String, String> map = new HashMap<>();
+            map.put("error", e.toString());
+            return new ResponseEntity<>(map, HttpStatus.OK);
+        }
+    }
+
+    // 상품 주문 취소
+    // todo 주문 취소 완료 후 상품 재고 관리
+    @PostMapping("/cancelpurchase")
+    public ResponseEntity<Object> CancelPurchase(@RequestHeader String authorization,
+    @RequestBody Map<String, String> req) throws Exception{
+        try{
+            Map<String, String> map = new HashMap<>();
+            String decoded = jwt.VerifyToken(authorization);
+            productService.CancelPurchase(req, decoded);
+            map.put("result", "success 취소가 완료되었습니다.");
+            //재고관리
             return new ResponseEntity<>(map, HttpStatus.OK);
         } catch(Exception e){
             Map<String, String> map = new HashMap<>();

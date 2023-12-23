@@ -2,6 +2,7 @@ package seohyun.app.crud.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -39,6 +40,23 @@ public class ProductService {
         }
     }
 
+    public List<Product> UpdateStock(List<Purchase> req) throws Exception{
+        try{
+            List<Product> list = new ArrayList<>();
+            for(Purchase purchase : req) {
+                Product product = productRepository.getProductByIdAndStock(purchase.getProductId(), purchase.getCount());
+                if (product == null) {
+                    return null;
+                }
+                product.setStock(product.getStock() - purchase.getCount());
+                list.add(product);
+            }
+            return productRepository.saveAll(list);
+        } catch(Exception e){
+            throw new Exception(e);
+        }
+    }
+
     @Transactional
     public void PurchaseProduct(List<Purchase> req, String decoded) throws Exception{
         try{
@@ -59,19 +77,11 @@ public class ProductService {
         }
     }
 
-    // @Transactional 붙이면 롤백 안됨.
-    public List<Product> UpdateStock(List<Purchase> req) throws Exception{
+    // todo 여기부터 다시
+    @Transactional
+    public void CancelPurchase(Map<String, String> req, String decoded) throws Exception{
         try{
-            List<Product> list = new ArrayList<>();
-            for(Purchase purchase : req) {
-                Product product = productRepository.getProductByIdAndStock(purchase.getProductId(), purchase.getCount());
-                if (product == null) {
-                    return null;
-                }
-                product.setStock(product.getStock() - purchase.getCount());
-                list.add(product);
-            }
-            return productRepository.saveAll(list);
+            purchaseRepository.deleteByIdAndUserId(req.get("id"), decoded);
         } catch(Exception e){
             throw new Exception(e);
         }
