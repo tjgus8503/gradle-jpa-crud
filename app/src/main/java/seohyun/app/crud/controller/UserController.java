@@ -255,7 +255,6 @@ public class UserController {
     }
 
     // todo @RequestBody 부분 다시
-    // todo save all
     // todo jpa pagination
     // todo dockerfile
 }

@@ -7,5 +7,5 @@ import seohyun.app.crud.models.Purchase;
 
 @Repository
 public interface PurchaseRepository extends JpaRepository<Purchase, String>{
-    void deleteByIdAndUserId(String id, String userId);
+    Purchase findOneById(String id);
 }

@@ -77,11 +77,28 @@ public class ProductService {
         }
     }
 
-    // todo 여기부터 다시
+    // todo deleteByIdAndUserId
     @Transactional
-    public void CancelPurchase(Map<String, String> req, String decoded) throws Exception{
+    public void CancelPurchase(Map<String, String> req) throws Exception{
         try{
-            purchaseRepository.deleteByIdAndUserId(req.get("id"), decoded);
+            purchaseRepository.deleteById(req.get("id"));
+        } catch(Exception e){
+            throw new Exception(e);
+        }
+    }
+
+    public Purchase FindPurchase(String id) throws Exception{
+        try{
+            return purchaseRepository.findOneById(id);
+        } catch(Exception e){
+            throw new Exception(e);
+        }
+    }
+
+    @Transactional
+    public int AddStock(Integer count, String productId) throws Exception{
+        try{
+            return productRepository.addStock(count, productId);
         } catch(Exception e){
             throw new Exception(e);
         }

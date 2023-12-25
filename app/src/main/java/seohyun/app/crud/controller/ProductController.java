@@ -72,16 +72,16 @@ public class ProductController {
     }
 
     // 상품 주문 취소
-    // todo 주문 취소 완료 후 상품 재고 관리
     @PostMapping("/cancelpurchase")
     public ResponseEntity<Object> CancelPurchase(@RequestHeader String authorization,
     @RequestBody Map<String, String> req) throws Exception{
         try{
             Map<String, String> map = new HashMap<>();
-            String decoded = jwt.VerifyToken(authorization);
-            productService.CancelPurchase(req, decoded);
+            jwt.VerifyToken(authorization);
+            Purchase findPurchase = productService.FindPurchase(req.get("id"));
+            productService.CancelPurchase(req);
             map.put("result", "success 취소가 완료되었습니다.");
-            //재고관리
+            productService.AddStock(findPurchase.getCount(), findPurchase.getProductId());
             return new ResponseEntity<>(map, HttpStatus.OK);
         } catch(Exception e){
             Map<String, String> map = new HashMap<>();
