@@ -11,6 +11,8 @@ import seohyun.app.crud.models.Product;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, String>{
     
+    Product findOneById(String id);
+    
     @Query(value = "select * from product where id = :productId and stock >= :count", nativeQuery = true)
     Product getProductByIdAndStock(@Param("productId") String productId, @Param("count") Integer count);
 

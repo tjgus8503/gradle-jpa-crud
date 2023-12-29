@@ -19,6 +19,7 @@ public class Product extends BaseEntity{
     @Id
     private String id;
     private String name;
+    private String userId;
     private String description;
     private Integer price;
     private Integer stock;

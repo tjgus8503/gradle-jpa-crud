@@ -111,6 +111,7 @@ public class UserController {
             return new ResponseEntity<>(map, HttpStatus.OK);
         }
     }
+
     // 이미지 등록
     @PostMapping("/createimage")
     public ResponseEntity<Object> CreateImage(@RequestHeader String authorization,
@@ -207,6 +208,7 @@ public class UserController {
             return new ResponseEntity<>(map, HttpStatus.OK);
         }
     }
+
     // 회원탈퇴
     // 회원탈퇴 시 서버에서 이미지 삭제
     @PostMapping("/unregister")
@@ -240,6 +242,7 @@ public class UserController {
             return new ResponseEntity<>(map, HttpStatus.OK);
         }
     }
+    
     // 회원정보 조회(마이페이지)
     @GetMapping("/mypage")
     public ResponseEntity<Object> MyPage(@RequestHeader String authorization) throws Exception{

@@ -25,10 +25,11 @@ public class ProductService {
     private final ImageFile imageFile;
 
     @Transactional
-    public void CreateProduct(Product req, MultipartFile[] image) throws Exception{
+    public void CreateProduct(Product req, MultipartFile[] image, String decoded) throws Exception{
         try{
             UUID uuid = UUID.randomUUID();
             req.setId(uuid.toString());
+            req.setUserId(decoded);
             if(image != null) {
                 List<String> imageUrls = imageFile.CreateImages(image);
                 String multiImages = String.join(",", imageUrls);
@@ -99,6 +100,30 @@ public class ProductService {
     public int AddStock(Integer count, String productId) throws Exception{
         try{
             return productRepository.addStock(count, productId);
+        } catch(Exception e){
+            throw new Exception(e);
+        }
+    }
+
+    public Product GetProduct(String id) throws Exception{
+        try{
+            return productRepository.findOneById(id);
+        } catch(Exception e){
+            throw new Exception(e);
+        }
+    }
+
+    @Transactional
+    public void UpdateProduct(Product req, MultipartFile[] image) throws Exception{
+        try{
+            if(image != null) {
+                List<String> imageUrls = imageFile.CreateImages(image);
+                String multiImages = String.join(",", imageUrls);
+                req.setImageUrl(multiImages);
+            } else {
+                req.setImageUrl(null);
+            }
+            productRepository.save(req);
         } catch(Exception e){
             throw new Exception(e);
         }

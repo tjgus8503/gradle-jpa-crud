@@ -50,4 +50,18 @@ public class ImageFile {
         }
         return list;
     }
+
+    public void DeleteImages(String priorImages) throws Exception{
+        try{
+            if (priorImages != null) {
+                List<String> imageUrls = List.of(priorImages.split(","));
+                for (String imageUrl : imageUrls) {
+                    Path filePath = Paths.get(imageUrl);
+                    Files.delete(filePath);
+                }
+            }
+        } catch(Exception e){
+            throw new Exception(e);
+        }
+    }
 }

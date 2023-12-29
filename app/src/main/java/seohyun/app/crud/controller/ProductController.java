@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import seohyun.app.crud.models.Product;
 import seohyun.app.crud.models.Purchase;
 import seohyun.app.crud.service.ProductService;
+import seohyun.app.crud.utils.ImageFile;
 import seohyun.app.crud.utils.Jwt;
 
 @RestController
@@ -29,6 +30,7 @@ import seohyun.app.crud.utils.Jwt;
 public class ProductController {
     private final ProductService productService;
     private final Jwt jwt;
+    private final ImageFile imageFile;
     
     // 상품 등록
     @PostMapping("/createproduct")
@@ -36,8 +38,8 @@ public class ProductController {
     @ModelAttribute Product req, @RequestPart(required = false) MultipartFile[] image) throws Exception{
         try{
             Map<String, String> map = new HashMap<>();
-            jwt.VerifyToken(authorization);
-            productService.CreateProduct(req, image);
+            String decoded = jwt.VerifyToken(authorization);
+            productService.CreateProduct(req, image, decoded);
             map.put("result", "success 등록이 완료되었습니다.");
             return new ResponseEntity<>(map, HttpStatus.OK);
         } catch(Exception e){
@@ -47,7 +49,40 @@ public class ProductController {
         }
     }
 
-    // todo 상품 수정, 삭제
+    // todo 상품 삭제
+
+    // 상품 수정(상품을 등록한 본인만 수정 가능)
+    // todo 수정할 상품이 null일 경우 추가
+    @PostMapping("/updateproduct")
+    public ResponseEntity<Object> UpdateProduct(@RequestHeader String authorization,
+    @ModelAttribute Product req, @RequestPart(required = false) MultipartFile[] image) throws Exception{
+        try{
+            Map<String, String> map = new HashMap<>();
+            String decoded = jwt.VerifyToken(authorization);
+            Product getProduct = productService.GetProduct(req.getId());
+            if (!(decoded.equals(getProduct.getUserId()))) {
+                map.put("result", "failed 수정 권한이 없습니다."); // todo 수정권한 에러찾기
+                return new ResponseEntity<>(map, HttpStatus.OK);
+            }
+            req.setUserId(decoded);
+            productService.UpdateProduct(req, image);
+            map.put("result", "success 수정이 완료되었습니다.");
+            new Thread() {
+                public void run(){
+                    try{
+                        imageFile.DeleteImages(getProduct.getImageUrl());
+                    } catch(Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            }.start();
+            return new ResponseEntity<>(map, HttpStatus.OK);
+        } catch(Exception e){
+            Map<String, String> map = new HashMap<>();
+            map.put("error", e.toString());
+            return new ResponseEntity<>(map, HttpStatus.OK);
+        }
+    }
 
     // 상품 주문
     @PostMapping("/purchaseproduct")
