@@ -60,13 +60,15 @@ public class ProductController {
             Map<String, String> map = new HashMap<>();
             String decoded = jwt.VerifyToken(authorization);
             Product getProduct = productService.GetProduct(req.getId());
-            if (!(decoded.equals(getProduct.getUserId()))) {
-                map.put("result", "failed 수정 권한이 없습니다."); // todo 수정권한 에러찾기
+            if (!decoded.equals(getProduct.getUserId())) {
+                map.put("result", "failed 수정 권한이 없습니다.");
                 return new ResponseEntity<>(map, HttpStatus.OK);
             }
             req.setUserId(decoded);
             productService.UpdateProduct(req, image);
             map.put("result", "success 수정이 완료되었습니다.");
+            // todo getProduct.getImageUrl()은 순서 상 기존 이미지가 아닌 바뀐 이미지다. 잘못 짠 코드.
+            // 순서를 바꿔도 문제 없는지 다시. 아니면 기존이미지 테이블을 따로 만들던지.
             new Thread() {
                 public void run(){
                     try{
