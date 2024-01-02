@@ -60,6 +60,7 @@ public class ProductController {
             Map<String, String> map = new HashMap<>();
             String decoded = jwt.VerifyToken(authorization);
             Product getProduct = productService.GetProduct(req.getId());
+            System.out.println("here1!!!!!!!!!!!!!!!!!!!!!!!!!!!!"+getProduct);
             if (!decoded.equals(getProduct.getUserId())) {
                 map.put("result", "failed 수정 권한이 없습니다.");
                 return new ResponseEntity<>(map, HttpStatus.OK);
@@ -67,17 +68,21 @@ public class ProductController {
             req.setUserId(decoded);
             productService.UpdateProduct(req, image);
             map.put("result", "success 수정이 완료되었습니다.");
-            // todo getProduct.getImageUrl()은 순서 상 기존 이미지가 아닌 바뀐 이미지다. 잘못 짠 코드.
-            // 순서를 바꿔도 문제 없는지 다시. 아니면 기존이미지 테이블을 따로 만들던지.
-            new Thread() {
-                public void run(){
-                    try{
-                        imageFile.DeleteImages(getProduct.getImageUrl());
-                    } catch(Exception e){
-                        e.printStackTrace();
-                    }
-                }
-            }.start();
+            System.out.println("here2!!!!!!!!!!!!!!!!!!!"+getProduct.getImageUrl());
+            // todo
+            // 스레드 코드 직전 getProduct.getImageUrl()을 콘솔에 찍어보면 수정 전 기존 이미지가 아닌 
+            // 수정 후 이미지 url이 찍힌다.
+            // 회원탈퇴, 상품주문 취소때와는 다르게 상품 수정때는 왜 수정 후 데이터로 찍힘?
+
+            // new Thread() {
+            //     public void run(){
+            //         try{
+            //             imageFile.DeleteImages(getProduct.getImageUrl());
+            //         } catch(Exception e){
+            //             e.printStackTrace();
+            //         }
+            //     }
+            // }.start();
             return new ResponseEntity<>(map, HttpStatus.OK);
         } catch(Exception e){
             Map<String, String> map = new HashMap<>();
